@@ -63,7 +63,6 @@ EOF
 sysctl -p && sysctl --system
 }
 
-}
 tcp_tune_v6(){ # IPv6优化TCP窗口
 sed -i '/net.ipv6.tcp_no_metrics_save/d' /etc/sysctl.conf
 sed -i '/net.ipv6.tcp_no_metrics_save/d' /etc/sysctl.conf
