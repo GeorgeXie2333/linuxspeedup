@@ -63,6 +63,50 @@ EOF
 sysctl -p && sysctl --system
 }
 
+}
+tcp_tune_v6(){ # IPv6优化TCP窗口
+sed -i '/net.ipv6.tcp_no_metrics_save/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_no_metrics_save/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_ecn/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_frto/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_mtu_probing/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_rfc1337/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_sack/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_fack/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_window_scaling/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_adv_win_scale/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_moderate_rcvbuf/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_rmem/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_wmem/d' /etc/sysctl.conf
+sed -i '/net.core.rmem_max/d' /etc/sysctl.conf
+sed -i '/net.core.wmem_max/d' /etc/sysctl.conf
+sed -i '/net.ipv6.udp_rmem_min/d' /etc/sysctl.conf
+sed -i '/net.ipv6.udp_wmem_min/d' /etc/sysctl.conf
+sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+sed -i '/net.ipv6.tcp_congestion_control/d' /etc/sysctl.conf
+cat >> /etc/sysctl.conf << EOF
+net.ipv6.tcp_no_metrics_save=1
+net.ipv6.tcp_ecn=0
+net.ipv6.tcp_frto=0
+net.ipv6.tcp_mtu_probing=0
+net.ipv6.tcp_rfc1337=0
+net.ipv6.tcp_sack=1
+net.ipv6.tcp_fack=1
+net.ipv6.tcp_window_scaling=1
+net.ipv6.tcp_adv_win_scale=1
+net.ipv6.tcp_moderate_rcvbuf=1
+net.core.rmem_max=16777216
+net.core.wmem_max=16777216
+net.ipv6.tcp_rmem=4096 87380 16777216
+net.ipv6.tcp_wmem=4096 16384 16777216
+net.ipv6.udp_rmem_min=8192
+net.ipv6.udp_wmem_min=8192
+net.core.default_qdisc=fq
+net.ipv6.tcp_congestion_control=bbr
+EOF
+sysctl -p && sysctl --system
+}
+
 tcp_fuck(){ # 优化TCP窗口魔改版
 sed -i '/net.ipv4.tcp_no_metrics_save/d' /etc/sysctl.conf
 sed -i '/net.ipv4.tcp_no_metrics_save/d' /etc/sysctl.conf
@@ -296,10 +340,12 @@ menu() {
 ${Green_font_prefix}0.${Font_color_suffix} 升级脚本
 ${Green_font_prefix}1.${Font_color_suffix} 安装BBR原版内核(已经是5.x的不需要)
 ${Green_font_prefix}2.${Font_color_suffix} TCP窗口调优
-${Green_font_prefix}3.${Font_color_suffix} TCP窗口调优魔改版
-${Green_font_prefix}4.${Font_color_suffix} 开启内核转发
-${Green_font_prefix}5.${Font_color_suffix} 系统资源限制调优
-${Green_font_prefix}6.${Font_color_suffix} 屏蔽ICMP ${Green_font_prefix}7.${Font_color_suffix} 开放ICMP
+${Green_font_prefix}3.${Font_color_suffix} TCP窗口调优(IPv6)
+${Green_font_prefix}4.${Font_color_suffix} TCP窗口调优魔改版
+${Green_font_prefix}5.${Font_color_suffix} 开启内核转发
+${Green_font_prefix}6.${Font_color_suffix} 系统资源限制调优
+${Green_font_prefix}7.${Font_color_suffix} 屏蔽ICMP
+${Green_font_prefix}8.${Font_color_suffix} 开放ICMP
 "
 get_system_info
 echo -e "当前系统信息: ${Font_color_suffix}$opsy ${Green_font_prefix}$virtual${Font_color_suffix} $arch ${Green_font_prefix}$kern${Font_color_suffix}
@@ -317,18 +363,21 @@ echo -e "当前系统信息: ${Font_color_suffix}$opsy ${Green_font_prefix}$virt
     tcp_tune
     ;;
   3)
-    tcp_fuck
+    tcp_tune_v6
     ;;
   4)
-    enable_forwarding
+    tcp_fuck
     ;;
   5)
-    ulimit_tune
+    enable_forwarding
     ;;
   6)
-    banping
+    ulimit_tune
     ;;
   7)
+    banping
+    ;;
+  8)
     unbanping
     ;;
   *)
